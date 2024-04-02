@@ -13,6 +13,9 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 	// 몬스터 에셋은 충돌을 아예 없앰
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+
+	CharacterFloorMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("Floor Mesh"));
+	CharacterFloorMesh->SetupAttachment(GetMesh());
 }
 
 void AXRDefenseCharacter::BeginPlay()
@@ -22,15 +25,32 @@ void AXRDefenseCharacter::BeginPlay()
 	// 초기에 어떤 테두리 색이 될 지 정함
 	SetDefaultStencilValue();
 
-	GetMesh()->SetRenderCustomDepth(true);
+	FloorMeshFirstStartPosition = CharacterFloorMesh->GetComponentLocation();
 
+	GetMesh()->SetRenderCustomDepth(true);
+	CharacterFloorMesh->SetRenderCustomDepth(true);
 }
 
 
 void AXRDefenseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	SetFloorMeshPosition(DeltaTime);
+}
 
+void AXRDefenseCharacter::SetFloorMeshPosition(float DeltaTime)
+{
+	FHitResult LinetraceResult;
+	GetWorld()->LineTraceSingleByChannel(LinetraceResult, GetActorLocation(), GetActorLocation() + FVector::DownVector * TRACE_LENGTH, ECollisionChannel::ECC_FloorTraceChannel);
+
+	if (LinetraceResult.bBlockingHit)
+	{
+		CharacterFloorMesh->SetWorldLocation(LinetraceResult.ImpactPoint + FVector::UpVector * 2.f);
+	}
+	else
+	{
+		CharacterFloorMesh->SetWorldLocation(FloorMeshFirstStartPosition);
+	}
 }
 
 void AXRDefenseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -56,6 +76,8 @@ void AXRDefenseCharacter::SetHighLightOff()
 void AXRDefenseCharacter::SetHighlightStencilValue()
 {
 	GetMesh()->SetCustomDepthStencilValue(WHITE_STENCIL);
+	CharacterFloorMesh->SetCustomDepthStencilValue(WHITE_STENCIL);
+
 }
 
 void AXRDefenseCharacter::SetDefaultStencilValue()
@@ -75,5 +97,9 @@ void AXRDefenseCharacter::SetDefaultStencilValue()
 	}
 
 	GetMesh()->SetCustomDepthStencilValue(StencilValue);
+	CharacterFloorMesh->SetCustomDepthStencilValue(StencilValue);
+
 }
+
+
 

@@ -31,10 +31,17 @@ private:
 	EObjectType objectType;
 
 	UPROPERTY(VisibleAnyWhere)
+	UStaticMeshComponent* CharacterFloorMesh;
+
+	FVector FloorMeshFirstStartPosition;
+
+	UPROPERTY(VisibleAnyWhere)
 	bool bIsHighlighted;
 
 	void SetHighlightStencilValue();
 	void SetDefaultStencilValue();
+
+	void SetFloorMeshPosition(float DeltaTime);
 
 public:	
 	

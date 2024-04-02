@@ -109,7 +109,12 @@ void AXRDefensePlayerController::BeginPlay()
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
 
-	SetInputMode(FInputModeGameAndUI());
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	SetInputMode(InputMode);
+
+	CurrentMouseCursor = EMouseCursor::GrabHand;
+
 }
 
 
