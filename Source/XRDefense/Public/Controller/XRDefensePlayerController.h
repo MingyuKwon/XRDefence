@@ -28,6 +28,13 @@ private:
 	void OnLeftClick();
 	void OnLeftClickReleased();
 
+	void LeftClickCheck(float DeltaTime);
+
+	bool bIsLeftButtonPressed = false;
+	FVector FromMouseToFloorTracingPoint;
+	AActor* CurrentGrabActor = nullptr;
+
 	IOutlineInterface* pastTarget = nullptr;
 	IOutlineInterface* currentTarget = nullptr;
+
 };

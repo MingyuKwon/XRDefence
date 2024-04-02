@@ -2,12 +2,17 @@
 
 
 #include "Controller/XRDefensePlayerController.h"
+#include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "XRDefense/XRDefense.h"
+
 
 void AXRDefensePlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	TraceUnderMouse();
+	LeftClickCheck(DeltaTime);
 }
 
 void AXRDefensePlayerController::SetupInputComponent()
@@ -19,26 +24,59 @@ void AXRDefensePlayerController::SetupInputComponent()
 
 }
 
+void AXRDefensePlayerController::LeftClickCheck(float DeltaTime)
+{
+	if (bIsLeftButtonPressed)
+	{
+		float ScreenX;
+		float ScreenY;
+		GetMousePosition(ScreenX, ScreenY);
+
+		FVector WorldLocation;
+		FVector WorldDirection;
+
+		DeprojectScreenPositionToWorld(ScreenX, ScreenY, WorldLocation, WorldDirection);
+
+		FHitResult LinetraceResult;
+		GetWorld()->LineTraceSingleByChannel(LinetraceResult, WorldLocation, WorldLocation + WorldDirection * TRACE_LENGTH, ECollisionChannel::ECC_FloorTraceChannel);
+
+		if (LinetraceResult.bBlockingHit)
+		{
+			FromMouseToFloorTracingPoint = LinetraceResult.ImpactPoint;
+
+			if (CurrentGrabActor)
+			{
+				FVector MovingPoint = FromMouseToFloorTracingPoint + FVector::UpVector * 150.f;
+				CurrentGrabActor->SetActorLocation(MovingPoint);
+			}
+		}
+
+		
+
+	}
+}
+
 void AXRDefensePlayerController::OnLeftClick()
 {
+	bIsLeftButtonPressed = true;
 	// 마우스 클릭 시 실행될 로직
 	if (currentTarget && currentTarget->GetIsHighlighted())
 	{
-		FVector TargetLocation = currentTarget->GetLocation();
-
-		currentTarget->SetLocation(TargetLocation + FVector::UpVector * 50.f);
+		CurrentGrabActor = Cast<AActor>(currentTarget);
 	}
 
 }
 
 void AXRDefensePlayerController::OnLeftClickReleased()
 {
+	bIsLeftButtonPressed = false;
+	CurrentGrabActor = nullptr;
+
 	// 마우스 버튼이 놓여졌을 때 실행될 로직
 	if (currentTarget && currentTarget->GetIsHighlighted())
 	{
 		FString str = FString::Printf(TEXT("OnLeftClickReleased"));
 		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, *str);
-
 	}
 
 }
@@ -66,10 +104,18 @@ void AXRDefensePlayerController::TraceUnderMouse()
 	// 마우스 아래에 아무것도 hit 하지 못했다면 그냥 넘어감
 	if (!UnderMouseHitResult.bBlockingHit)
 	{
+		if (pastTarget)
+		{
+			pastTarget->SetHighLightOff();
+		}
+
 		if (currentTarget)
 		{
 			currentTarget->SetHighLightOff();
 		}
+
+		currentTarget = nullptr;
+
 		return;
 	}
 
