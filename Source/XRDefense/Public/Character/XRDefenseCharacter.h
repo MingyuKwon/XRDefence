@@ -19,8 +19,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	virtual void SetOutLineOn();
-	virtual void SetOutLineOff();
+	virtual void SetHighLightOn();
+	virtual void SetHighLightOff();
 
 
 protected:
@@ -32,6 +32,9 @@ private:
 
 	UPROPERTY(VisibleAnyWhere)
 	bool bIsHighlighted;
+
+	void SetHighlightStencilValue();
+	void SetDefaultStencilValue();
 
 public:	
 	

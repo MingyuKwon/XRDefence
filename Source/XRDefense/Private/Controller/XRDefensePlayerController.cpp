@@ -68,7 +68,7 @@ void AXRDefensePlayerController::TraceUnderMouse()
 	{
 		if (currentTarget)
 		{
-			currentTarget->SetOutLineOff();
+			currentTarget->SetHighLightOff();
 		}
 		return;
 	}
@@ -80,12 +80,12 @@ void AXRDefensePlayerController::TraceUnderMouse()
 
 	if (pastTarget)
 	{
-		pastTarget->SetOutLineOff();
+		pastTarget->SetHighLightOff();
 	}
 
 	if (currentTarget)
 	{
-		currentTarget->SetOutLineOn();
+		currentTarget->SetHighLightOn();
 	}
 
 }

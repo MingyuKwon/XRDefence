@@ -20,21 +20,10 @@ void AXRDefenseCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	// 초기에 어떤 테두리 색이 될 지 정함
-	int32 StencilValue = 0;
-	switch (objectType)
-	{
-	case EObjectType::EOT_NONE:
-		StencilValue = WHITE_STENCIL;
-		break;
-	case EObjectType::EOT_ATTACKER:
-		StencilValue = RED_STENCIL;
-		break;
-	case EObjectType::EOT_DEFENDER:
-		StencilValue = BLUE_STENCIL;
-		break;
-	}
+	SetDefaultStencilValue();
 
-	GetMesh()->SetCustomDepthStencilValue(StencilValue);
+	GetMesh()->SetRenderCustomDepth(true);
+
 }
 
 
@@ -50,15 +39,41 @@ void AXRDefenseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 }
 
-void AXRDefenseCharacter::SetOutLineOn()
+void AXRDefenseCharacter::SetHighLightOn()
 {
-	GetMesh()->SetRenderCustomDepth(true);
+	SetHighlightStencilValue();
+
 	bIsHighlighted = true;
 }
 
-void AXRDefenseCharacter::SetOutLineOff()
+void AXRDefenseCharacter::SetHighLightOff()
 {
-	GetMesh()->SetRenderCustomDepth(false);
+	SetDefaultStencilValue();
+
 	bIsHighlighted = false;
+}
+
+void AXRDefenseCharacter::SetHighlightStencilValue()
+{
+	GetMesh()->SetCustomDepthStencilValue(WHITE_STENCIL);
+}
+
+void AXRDefenseCharacter::SetDefaultStencilValue()
+{
+	int32 StencilValue = 0;
+	switch (objectType)
+	{
+	case EObjectType::EOT_NONE:
+		StencilValue = WHITE_STENCIL;
+		break;
+	case EObjectType::EOT_ATTACKER:
+		StencilValue = RED_STENCIL;
+		break;
+	case EObjectType::EOT_DEFENDER:
+		StencilValue = BLUE_STENCIL;
+		break;
+	}
+
+	GetMesh()->SetCustomDepthStencilValue(StencilValue);
 }
 
