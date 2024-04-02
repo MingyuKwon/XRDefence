@@ -71,8 +71,9 @@ void AXRDefensePlayerController::LineTraceMouseToFloor(FHitResult& LinetraceResu
 void AXRDefensePlayerController::OnLeftClickPressed()
 {
 	bIsLeftButtonPressed = true;
-	// 마우스 클릭 시 실행될 로직
-	if (currentTarget && currentTarget->GetIsHighlighted())
+
+	// 물체를 집을 수 있는 경우는, 마우스가 물체 위에 있고, 그 물체가 하이라이트 되어 있고, 그 물체가 보드위에 있지 않은 경우에만 가능
+	if (currentTarget && currentTarget->GetIsHighlighted() && !currentTarget->GetIsOnBoard())
 	{
 		CurrentGrabActor = Cast<AActor>(currentTarget);
 	}
