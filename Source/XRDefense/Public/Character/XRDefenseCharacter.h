@@ -33,6 +33,15 @@ private:
 	UPROPERTY(VisibleAnyWhere)
 	UStaticMeshComponent* CharacterFloorMesh;
 
+	UPROPERTY(EditAnyWhere)
+	UStaticMesh* DefenseCircle;
+
+	UPROPERTY(EditAnyWhere)
+	UStaticMesh* OffenceCircle;
+
+	UPROPERTY(EditAnyWhere)
+	UStaticMesh* NoneCircle;
+
 	FVector FloorMeshFirstStartPosition;
 
 	UPROPERTY(VisibleAnyWhere)

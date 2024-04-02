@@ -25,6 +25,28 @@ void AXRDefenseCharacter::BeginPlay()
 	// 초기에 어떤 테두리 색이 될 지 정함
 	SetDefaultStencilValue();
 
+	switch (objectType)
+	{
+	case EObjectType::EOT_NONE:
+		if (NoneCircle)
+		{
+			CharacterFloorMesh->SetStaticMesh(NoneCircle);
+		}
+		break;
+	case EObjectType::EOT_ATTACKER:
+		if (OffenceCircle)
+		{
+			CharacterFloorMesh->SetStaticMesh(OffenceCircle);
+		}
+		break;
+	case EObjectType::EOT_DEFENDER:
+		if (DefenseCircle)
+		{
+			CharacterFloorMesh->SetStaticMesh(DefenseCircle);
+		}
+		break;
+	}
+
 	FloorMeshFirstStartPosition = CharacterFloorMesh->GetComponentLocation();
 
 	GetMesh()->SetRenderCustomDepth(true);
