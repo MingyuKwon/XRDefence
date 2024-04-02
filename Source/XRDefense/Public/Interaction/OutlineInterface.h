@@ -38,7 +38,6 @@ public:
 	EObjectType objectType;
 
 	virtual void SetOutLineOn() = 0;
-
 	virtual void SetOutLineOff() = 0;
 
 };

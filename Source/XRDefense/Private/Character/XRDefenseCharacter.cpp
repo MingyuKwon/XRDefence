@@ -7,8 +7,12 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	  
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 전체적인 충격 감지 캡슐은 카메라와 부딪히지 않도록 함
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
+	// 몬스터 에셋은 충돌을 아예 없앰
+	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 }
 
 void AXRDefenseCharacter::BeginPlay()
@@ -30,13 +34,7 @@ void AXRDefenseCharacter::BeginPlay()
 		break;
 	}
 
-	FString str = FString::Printf(TEXT("%d"), StencilValue);
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, *str);
-
 	GetMesh()->SetCustomDepthStencilValue(StencilValue);
-
-
-	SetOutLineOn();
 }
 
 void AXRDefenseCharacter::Tick(float DeltaTime)
@@ -55,8 +53,6 @@ void AXRDefenseCharacter::SetOutLineOn()
 {
 	GetMesh()->SetRenderCustomDepth(true);
 
-
-	
 }
 
 void AXRDefenseCharacter::SetOutLineOff()
