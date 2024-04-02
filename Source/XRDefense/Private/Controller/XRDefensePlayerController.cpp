@@ -28,36 +28,52 @@ void AXRDefensePlayerController::LeftClickCheck(float DeltaTime)
 {
 	if (bIsLeftButtonPressed)
 	{
-		float ScreenX;
-		float ScreenY;
-		GetMousePosition(ScreenX, ScreenY);
-
-		FVector WorldLocation;
-		FVector WorldDirection;
-
-		DeprojectScreenPositionToWorld(ScreenX, ScreenY, WorldLocation, WorldDirection);
-
 		FHitResult LinetraceResult;
-		GetWorld()->LineTraceSingleByChannel(LinetraceResult, WorldLocation, WorldLocation + WorldDirection * TRACE_LENGTH, ECollisionChannel::ECC_FloorTraceChannel);
+
+		LineTraceMouseToFloor(LinetraceResult);
 
 		if (LinetraceResult.bBlockingHit)
 		{
-			FromMouseToFloorTracingPoint = LinetraceResult.ImpactPoint;
+			CurrentGrabActorOutLineInterface = CurrentGrabActorOutLineInterface == nullptr ? Cast<IOutlineInterface>(CurrentGrabActor) : CurrentGrabActorOutLineInterface;
 
-			if (CurrentGrabActor)
+			if (CurrentGrabActor && CurrentGrabActorOutLineInterface)
 			{
-				FVector MovingPoint = FromMouseToFloorTracingPoint + FVector::UpVector * 150.f;
+				FVector MovingPoint = FromMouseToFloorTracingPoint + FVector::UpVector * PlaceUpwardValue;
 				CurrentGrabActor->SetActorLocation(MovingPoint);
+
+				CurrentGrabActorOutLineInterface->SetHighLightOn();
 			}
 		}
 
 		
+	}
+}
 
+void AXRDefensePlayerController::LineTraceMouseToFloor(FHitResult& LinetraceResult)
+{
+	float ScreenX;
+	float ScreenY;
+	GetMousePosition(ScreenX, ScreenY);
+
+	FVector WorldLocation;
+	FVector WorldDirection;
+
+	DeprojectScreenPositionToWorld(ScreenX, ScreenY, WorldLocation, WorldDirection);
+
+	GetWorld()->LineTraceSingleByChannel(LinetraceResult, WorldLocation, WorldLocation + WorldDirection * TRACE_LENGTH, ECollisionChannel::ECC_FloorTraceChannel);
+
+	if (LinetraceResult.bBlockingHit)
+	{
+		FromMouseToFloorTracingPoint = LinetraceResult.ImpactPoint;
 	}
 }
 
 void AXRDefensePlayerController::OnLeftClick()
 {
+	FString str = FString::Printf(TEXT("OnLeftClickPressed"));
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, *str);
+
+
 	bIsLeftButtonPressed = true;
 	// 마우스 클릭 시 실행될 로직
 	if (currentTarget && currentTarget->GetIsHighlighted())
@@ -69,16 +85,17 @@ void AXRDefensePlayerController::OnLeftClick()
 
 void AXRDefensePlayerController::OnLeftClickReleased()
 {
+	FString str = FString::Printf(TEXT("OnLeftClickReleased"));
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, *str);
+
+
 	bIsLeftButtonPressed = false;
 	CurrentGrabActor = nullptr;
-
-	// 마우스 버튼이 놓여졌을 때 실행될 로직
-	if (currentTarget && currentTarget->GetIsHighlighted())
+	if (CurrentGrabActorOutLineInterface)
 	{
-		FString str = FString::Printf(TEXT("OnLeftClickReleased"));
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, *str);
+		CurrentGrabActorOutLineInterface->SetHighLightOff();
 	}
-
+	CurrentGrabActorOutLineInterface = nullptr;
 }
 
 void AXRDefensePlayerController::BeginPlay()
@@ -129,7 +146,7 @@ void AXRDefensePlayerController::TraceUnderMouse()
 		pastTarget->SetHighLightOff();
 	}
 
-	if (currentTarget)
+	if (currentTarget && !bIsLeftButtonPressed)
 	{
 		currentTarget->SetHighLightOn();
 	}
