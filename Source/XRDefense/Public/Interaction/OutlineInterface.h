@@ -39,7 +39,7 @@ public:
 	virtual void SetHighLightOff() = 0;
 	virtual bool GetIsHighlighted() = 0;
 
-	virtual FVector GetLocation() = 0;
-	virtual void SetLocation(FVector position) = 0;
+	virtual bool GetIsOnBoard() = 0;
+	virtual void SetIsOnBoard(bool isOnBoard) = 0;
 
 };

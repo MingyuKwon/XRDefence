@@ -10,3 +10,6 @@
 
 #define TRACE_LENGTH 10000
 #define ECC_FloorTraceChannel ECC_GameTraceChannel1
+#define ECC_BoardTraceChannel ECC_GameTraceChannel2
+
+

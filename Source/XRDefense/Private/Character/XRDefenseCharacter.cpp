@@ -49,8 +49,7 @@ void AXRDefenseCharacter::BeginPlay()
 
 	FloorMeshFirstStartPosition = CharacterFloorMesh->GetComponentLocation();
 
-	GetMesh()->SetRenderCustomDepth(true);
-	CharacterFloorMesh->SetRenderCustomDepth(true);
+	SetHighLightShowEnable(false);
 }
 
 
@@ -83,6 +82,7 @@ void AXRDefenseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 void AXRDefenseCharacter::SetHighLightOn()
 {
+	SetHighLightShowEnable(true);
 	SetHighlightStencilValue();
 
 	bIsHighlighted = true;
@@ -90,9 +90,30 @@ void AXRDefenseCharacter::SetHighLightOn()
 
 void AXRDefenseCharacter::SetHighLightOff()
 {
+	// 만약 아래에 보드가 없고 하이라이트도 사라지면 그 때 더이상 윤곽선 못 보게 함
+	if (!bIsOnBoard)
+	{
+		SetHighLightShowEnable(false);
+	}
+
 	SetDefaultStencilValue();
 
 	bIsHighlighted = false;
+}
+
+void AXRDefenseCharacter::SetIsOnBoard(bool isOnBoard)
+{
+	bIsOnBoard = isOnBoard;
+
+	// 새로 보드 위에 놓인 경우
+	if (isOnBoard)
+	{
+		SetHighLightShowEnable(true);
+	}
+	else // 보드에서 떠난 경우
+	{
+		SetHighLightShowEnable(false);
+	}
 }
 
 void AXRDefenseCharacter::SetHighlightStencilValue()
@@ -121,6 +142,12 @@ void AXRDefenseCharacter::SetDefaultStencilValue()
 	GetMesh()->SetCustomDepthStencilValue(StencilValue);
 	CharacterFloorMesh->SetCustomDepthStencilValue(StencilValue);
 
+}
+
+void AXRDefenseCharacter::SetHighLightShowEnable(bool bIsEnable)
+{
+	GetMesh()->SetRenderCustomDepth(bIsEnable);
+	CharacterFloorMesh->SetRenderCustomDepth(bIsEnable);
 }
 
 

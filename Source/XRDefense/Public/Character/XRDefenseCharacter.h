@@ -47,15 +47,20 @@ private:
 	UPROPERTY(VisibleAnyWhere)
 	bool bIsHighlighted;
 
+	UPROPERTY(VisibleAnyWhere)
+	bool bIsOnBoard = false;
+
 	void SetHighlightStencilValue();
 	void SetDefaultStencilValue();
+
+	void SetHighLightShowEnable(bool bIsEnable);
 
 	void SetFloorMeshPosition(float DeltaTime);
 
 public:	
 	
 	FORCEINLINE virtual bool GetIsHighlighted() override { return bIsHighlighted; }
-	FORCEINLINE virtual FVector GetLocation() override { return GetActorLocation(); }
-	FORCEINLINE virtual void SetLocation(FVector position) {SetActorLocation(position);}
+	FORCEINLINE virtual bool GetIsOnBoard() override { return bIsOnBoard; }
+	virtual void SetIsOnBoard(bool isOnBoard) override;
 
 };

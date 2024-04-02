@@ -25,13 +25,14 @@ protected:
 private:
 	void TraceUnderMouse();
 
-	void OnLeftClick();
+	void OnLeftClickPressed();
 	void OnLeftClickReleased();
 
 	void LeftClickCheck(float DeltaTime);
 
 	// 현재 마우스의 위치를 바닥에 투영하면 어디에 부딪히는지를 구한다
 	void LineTraceMouseToFloor(FHitResult& LinetraceResult);
+	bool CheckBeneathIsBoard(IOutlineInterface* target);
 
 	bool bIsLeftButtonPressed = false;
 	FVector FromMouseToFloorTracingPoint;
