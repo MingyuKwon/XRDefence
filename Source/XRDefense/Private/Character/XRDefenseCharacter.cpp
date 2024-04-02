@@ -37,6 +37,7 @@ void AXRDefenseCharacter::BeginPlay()
 	GetMesh()->SetCustomDepthStencilValue(StencilValue);
 }
 
+
 void AXRDefenseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -52,12 +53,12 @@ void AXRDefenseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 void AXRDefenseCharacter::SetOutLineOn()
 {
 	GetMesh()->SetRenderCustomDepth(true);
-
+	bIsHighlighted = true;
 }
 
 void AXRDefenseCharacter::SetOutLineOff()
 {
 	GetMesh()->SetRenderCustomDepth(false);
-
+	bIsHighlighted = false;
 }
 

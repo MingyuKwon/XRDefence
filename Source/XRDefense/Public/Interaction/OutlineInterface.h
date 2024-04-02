@@ -35,9 +35,10 @@ class XRDEFENSE_API IOutlineInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	EObjectType objectType;
-
 	virtual void SetOutLineOn() = 0;
 	virtual void SetOutLineOff() = 0;
+	virtual bool GetIsHighlighted() = 0;
+	virtual FVector GetLocation() = 0;
+	virtual void SetLocation(FVector position) = 0;
 
 };

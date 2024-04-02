@@ -17,13 +17,16 @@ class XRDEFENSE_API AXRDefensePlayerController : public APlayerController
 	
 public:
 	virtual void Tick(float DeltaTime) override;
-
+	virtual void SetupInputComponent() override;
 protected:
 	virtual void BeginPlay() override;
 
 
 private:
 	void TraceUnderMouse();
+
+	void OnLeftClick();
+	void OnLeftClickReleased();
 
 	IOutlineInterface* pastTarget = nullptr;
 	IOutlineInterface* currentTarget = nullptr;

@@ -16,6 +16,12 @@ class XRDEFENSE_API AXRDefenseCharacter : public ACharacter, public IOutlineInte
 
 public:
 	AXRDefenseCharacter();
+	virtual void Tick(float DeltaTime) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void SetOutLineOn();
+	virtual void SetOutLineOff();
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -24,13 +30,13 @@ private:
 	UPROPERTY(EditAnyWhere)
 	EObjectType objectType;
 
+	UPROPERTY(VisibleAnyWhere)
+	bool bIsHighlighted;
 
 public:	
-	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-
-	virtual void SetOutLineOn();
-	virtual void SetOutLineOff();
+	
+	FORCEINLINE virtual bool GetIsHighlighted() override { return bIsHighlighted; }
+	FORCEINLINE virtual FVector GetLocation() override { return GetActorLocation(); }
+	FORCEINLINE virtual void SetLocation(FVector position) {SetActorLocation(position);}
 
 };

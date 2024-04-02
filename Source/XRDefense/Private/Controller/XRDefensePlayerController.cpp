@@ -10,6 +10,39 @@ void AXRDefensePlayerController::Tick(float DeltaTime)
 	TraceUnderMouse();
 }
 
+void AXRDefensePlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	InputComponent->BindAction("LeftClick", IE_Pressed, this, &AXRDefensePlayerController::OnLeftClick);
+	InputComponent->BindAction("LeftClick", IE_Released, this, &AXRDefensePlayerController::OnLeftClickReleased);
+
+}
+
+void AXRDefensePlayerController::OnLeftClick()
+{
+	// 마우스 클릭 시 실행될 로직
+	if (currentTarget && currentTarget->GetIsHighlighted())
+	{
+		FVector TargetLocation = currentTarget->GetLocation();
+
+		currentTarget->SetLocation(TargetLocation + FVector::UpVector * 50.f);
+	}
+
+}
+
+void AXRDefensePlayerController::OnLeftClickReleased()
+{
+	// 마우스 버튼이 놓여졌을 때 실행될 로직
+	if (currentTarget && currentTarget->GetIsHighlighted())
+	{
+		FString str = FString::Printf(TEXT("OnLeftClickReleased"));
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, *str);
+
+	}
+
+}
+
 void AXRDefensePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -23,6 +56,7 @@ void AXRDefensePlayerController::BeginPlay()
 
 	SetInputMode(FInputModeGameAndUI());
 }
+
 
 void AXRDefensePlayerController::TraceUnderMouse()
 {
@@ -38,10 +72,6 @@ void AXRDefensePlayerController::TraceUnderMouse()
 		}
 		return;
 	}
-
-
-	FString str = FString::Printf(TEXT("%s"), *UnderMouseHitResult.GetActor()->GetName());
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, *str);
 
 	IOutlineInterface* TargetOutLineInterface = Cast<IOutlineInterface>(UnderMouseHitResult.GetActor());
 
