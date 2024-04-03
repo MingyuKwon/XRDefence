@@ -19,7 +19,7 @@ void AXRDefensePlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	InputComponent->BindAction("LeftClick", IE_Pressed, this, &AXRDefensePlayerController::OnLeftClick);
+	InputComponent->BindAction("LeftClick", IE_Pressed, this, &AXRDefensePlayerController::OnLeftClickPressed);
 	InputComponent->BindAction("LeftClick", IE_Released, this, &AXRDefensePlayerController::OnLeftClickReleased);
 
 }
@@ -39,7 +39,7 @@ void AXRDefensePlayerController::LeftClickCheck(float DeltaTime)
 			if (CurrentGrabActor && CurrentGrabActorOutLineInterface)
 			{
 				FVector MovingPoint = FromMouseToFloorTracingPoint + FVector::UpVector * PlaceUpwardValue;
-				CurrentGrabActor->SetActorLocation(MovingPoint);
+				CurrentGrabActorOutLineInterface->SetActorPosition(MovingPoint);
 
 				CurrentGrabActorOutLineInterface->SetHighLightOn();
 			}
@@ -68,15 +68,12 @@ void AXRDefensePlayerController::LineTraceMouseToFloor(FHitResult& LinetraceResu
 	}
 }
 
-void AXRDefensePlayerController::OnLeftClick()
+void AXRDefensePlayerController::OnLeftClickPressed()
 {
-	FString str = FString::Printf(TEXT("OnLeftClickPressed"));
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, *str);
-
-
 	bIsLeftButtonPressed = true;
-	// 마우스 클릭 시 실행될 로직
-	if (currentTarget && currentTarget->GetIsHighlighted())
+
+	// 물체를 집을 수 있는 경우는, 마우스가 물체 위에 있고, 그 물체가 하이라이트 되어 있고, 그 물체가 보드위에 있지 않은 경우에만 가능
+	if (currentTarget && currentTarget->GetIsHighlighted() && !currentTarget->GetIsOnBoard())
 	{
 		CurrentGrabActor = Cast<AActor>(currentTarget);
 	}
@@ -85,17 +82,30 @@ void AXRDefensePlayerController::OnLeftClick()
 
 void AXRDefensePlayerController::OnLeftClickReleased()
 {
-	FString str = FString::Printf(TEXT("OnLeftClickReleased"));
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, *str);
-
-
 	bIsLeftButtonPressed = false;
 	CurrentGrabActor = nullptr;
+
 	if (CurrentGrabActorOutLineInterface)
 	{
+		// 자기 아래에 보드가 있는지 없는지 확인하고 그 값을 인터페이스의 set board 함수를 사용해서 배정한다
+		CurrentGrabActorOutLineInterface->SetIsOnBoard(CheckBeneathIsBoard(CurrentGrabActorOutLineInterface));
+		
 		CurrentGrabActorOutLineInterface->SetHighLightOff();
 	}
 	CurrentGrabActorOutLineInterface = nullptr;
+}
+
+
+bool AXRDefensePlayerController::CheckBeneathIsBoard(IOutlineInterface* target)
+{
+	AActor* targetActor = Cast<AActor>(target);
+	if (targetActor == nullptr) return false;
+
+	FHitResult LinetraceResult;
+	GetWorld()->LineTraceSingleByChannel(LinetraceResult, targetActor->GetActorLocation(), targetActor->GetActorLocation() + FVector::DownVector * TRACE_LENGTH, ECollisionChannel::ECC_BoardTraceChannel);
+
+	// 보드 판을 기준으로 라인 트레이싱을 하므로 보드판과 부딪혔다면 아래는 보드판이 맞다
+	return LinetraceResult.bBlockingHit;
 }
 
 void AXRDefensePlayerController::BeginPlay()

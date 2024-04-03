@@ -11,6 +11,7 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
 	// 몬스터 에셋은 충돌을 아예 없앰
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
@@ -48,9 +49,9 @@ void AXRDefenseCharacter::BeginPlay()
 	}
 
 	FloorMeshFirstStartPosition = CharacterFloorMesh->GetComponentLocation();
+	LastPlacablePosition = GetActorLocation();
 
-	GetMesh()->SetRenderCustomDepth(true);
-	CharacterFloorMesh->SetRenderCustomDepth(true);
+	SetHighLightShowEnable(false);
 }
 
 
@@ -83,6 +84,7 @@ void AXRDefenseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 void AXRDefenseCharacter::SetHighLightOn()
 {
+	SetHighLightShowEnable(true);
 	SetHighlightStencilValue();
 
 	bIsHighlighted = true;
@@ -90,9 +92,74 @@ void AXRDefenseCharacter::SetHighLightOn()
 
 void AXRDefenseCharacter::SetHighLightOff()
 {
+	// 만약 아래에 보드가 없고 하이라이트도 사라지면 그 때 더이상 윤곽선 못 보게 함
+	if (!bIsOnBoard)
+	{
+		SetHighLightShowEnable(false);
+	}
+
 	SetDefaultStencilValue();
 
 	bIsHighlighted = false;
+}
+
+void AXRDefenseCharacter::SetIsOnBoard(bool isOnBoard)
+{
+	bIsOnBoard = isOnBoard;
+
+	// 새로 보드 위에 놓인 경우
+	if (isOnBoard)
+	{
+		SetHighLightShowEnable(true);
+	}
+	else // 보드에서 떠난 경우
+	{
+		SetHighLightShowEnable(false);
+	}
+}
+
+void AXRDefenseCharacter::SetActorPosition(FVector Position)
+{
+	FVector FinalPosition = Position;
+
+
+
+	// 지금 놓으려는 공간이 캐릭터를 놓을 수 없는 공간이라면
+	if (!CheckBeneathIsPlacableArea(FinalPosition))
+	{
+		FString str = FString::Printf(TEXT("Cannot Place"));
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, *str);
+
+		// 놓을 수 있는 공간중에서 가장 가까운 곳을 찾아야 할 것이다
+		FinalPosition = LastPlacablePosition;
+	}
+
+	LastPlacablePosition = FinalPosition;
+	SetActorLocation(FinalPosition);
+
+}
+
+bool AXRDefenseCharacter::CheckBeneathIsPlacableArea(FVector StartPoint)
+{
+	ECollisionChannel traceChannel = ECollisionChannel::ECC_Visibility;
+
+	switch (objectType)
+	{
+	case EObjectType::EOT_NONE:
+		traceChannel = ECollisionChannel::ECC_Visibility;
+		break;
+	case EObjectType::EOT_ATTACKER:
+		traceChannel = ECollisionChannel::ECC_OffencerFieldTraceChannel;
+		break;
+	case EObjectType::EOT_DEFENDER:
+		traceChannel = ECollisionChannel::ECC_DeffenceFieldTraceChannel;
+		break;
+	}
+
+	FHitResult LinetraceResult;
+	GetWorld()->LineTraceSingleByChannel(LinetraceResult, StartPoint, StartPoint + FVector::DownVector * TRACE_LENGTH, traceChannel);
+
+	return LinetraceResult.bBlockingHit;
 }
 
 void AXRDefenseCharacter::SetHighlightStencilValue()
@@ -121,6 +188,12 @@ void AXRDefenseCharacter::SetDefaultStencilValue()
 	GetMesh()->SetCustomDepthStencilValue(StencilValue);
 	CharacterFloorMesh->SetCustomDepthStencilValue(StencilValue);
 
+}
+
+void AXRDefenseCharacter::SetHighLightShowEnable(bool bIsEnable)
+{
+	GetMesh()->SetRenderCustomDepth(bIsEnable);
+	CharacterFloorMesh->SetRenderCustomDepth(bIsEnable);
 }
 
 
