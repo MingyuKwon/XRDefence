@@ -42,4 +42,6 @@ public:
 	virtual bool GetIsOnBoard() = 0;
 	virtual void SetIsOnBoard(bool isOnBoard) = 0;
 
+	virtual void SetActorPosition(FVector Position) = 0;
+
 };

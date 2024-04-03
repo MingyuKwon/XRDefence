@@ -11,6 +11,7 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
 	// 몬스터 에셋은 충돌을 아예 없앰
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
@@ -48,6 +49,7 @@ void AXRDefenseCharacter::BeginPlay()
 	}
 
 	FloorMeshFirstStartPosition = CharacterFloorMesh->GetComponentLocation();
+	LastPlacablePosition = GetActorLocation();
 
 	SetHighLightShowEnable(false);
 }
@@ -114,6 +116,50 @@ void AXRDefenseCharacter::SetIsOnBoard(bool isOnBoard)
 	{
 		SetHighLightShowEnable(false);
 	}
+}
+
+void AXRDefenseCharacter::SetActorPosition(FVector Position)
+{
+	FVector FinalPosition = Position;
+
+
+
+	// 지금 놓으려는 공간이 캐릭터를 놓을 수 없는 공간이라면
+	if (!CheckBeneathIsPlacableArea(FinalPosition))
+	{
+		FString str = FString::Printf(TEXT("Cannot Place"));
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, *str);
+
+		// 놓을 수 있는 공간중에서 가장 가까운 곳을 찾아야 할 것이다
+		FinalPosition = LastPlacablePosition;
+	}
+
+	LastPlacablePosition = FinalPosition;
+	SetActorLocation(FinalPosition);
+
+}
+
+bool AXRDefenseCharacter::CheckBeneathIsPlacableArea(FVector StartPoint)
+{
+	ECollisionChannel traceChannel = ECollisionChannel::ECC_Visibility;
+
+	switch (objectType)
+	{
+	case EObjectType::EOT_NONE:
+		traceChannel = ECollisionChannel::ECC_Visibility;
+		break;
+	case EObjectType::EOT_ATTACKER:
+		traceChannel = ECollisionChannel::ECC_OffencerFieldTraceChannel;
+		break;
+	case EObjectType::EOT_DEFENDER:
+		traceChannel = ECollisionChannel::ECC_DeffenceFieldTraceChannel;
+		break;
+	}
+
+	FHitResult LinetraceResult;
+	GetWorld()->LineTraceSingleByChannel(LinetraceResult, StartPoint, StartPoint + FVector::DownVector * TRACE_LENGTH, traceChannel);
+
+	return LinetraceResult.bBlockingHit;
 }
 
 void AXRDefenseCharacter::SetHighlightStencilValue()

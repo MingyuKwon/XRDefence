@@ -44,6 +44,8 @@ private:
 
 	FVector FloorMeshFirstStartPosition;
 
+	FVector LastPlacablePosition;
+
 	UPROPERTY(VisibleAnyWhere)
 	bool bIsHighlighted;
 
@@ -56,11 +58,16 @@ private:
 	void SetHighLightShowEnable(bool bIsEnable);
 
 	void SetFloorMeshPosition(float DeltaTime);
+	bool CheckBeneathIsPlacableArea(FVector StartPoint);
+
 
 public:	
 	
 	FORCEINLINE virtual bool GetIsHighlighted() override { return bIsHighlighted; }
 	FORCEINLINE virtual bool GetIsOnBoard() override { return bIsOnBoard; }
 	virtual void SetIsOnBoard(bool isOnBoard) override;
+
+	virtual void SetActorPosition(FVector Position) override;
+
 
 };

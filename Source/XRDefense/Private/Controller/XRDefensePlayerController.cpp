@@ -39,7 +39,7 @@ void AXRDefensePlayerController::LeftClickCheck(float DeltaTime)
 			if (CurrentGrabActor && CurrentGrabActorOutLineInterface)
 			{
 				FVector MovingPoint = FromMouseToFloorTracingPoint + FVector::UpVector * PlaceUpwardValue;
-				CurrentGrabActor->SetActorLocation(MovingPoint);
+				CurrentGrabActorOutLineInterface->SetActorPosition(MovingPoint);
 
 				CurrentGrabActorOutLineInterface->SetHighLightOn();
 			}
@@ -103,9 +103,6 @@ bool AXRDefensePlayerController::CheckBeneathIsBoard(IOutlineInterface* target)
 
 	FHitResult LinetraceResult;
 	GetWorld()->LineTraceSingleByChannel(LinetraceResult, targetActor->GetActorLocation(), targetActor->GetActorLocation() + FVector::DownVector * TRACE_LENGTH, ECollisionChannel::ECC_BoardTraceChannel);
-
-	FString str = FString::Printf(TEXT("%s") , LinetraceResult.bBlockingHit ? *FString("Board is Beneath") : *FString("Board is Not Beneath"));
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, *str);
 
 	// 보드 판을 기준으로 라인 트레이싱을 하므로 보드판과 부딪혔다면 아래는 보드판이 맞다
 	return LinetraceResult.bBlockingHit;
