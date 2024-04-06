@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Interaction/CombatInterface.h"
 #include "Character/XRDefenseCharacter.h"
+#include "Interaction/OutlineInterface.h"
+
 
 
 
@@ -16,6 +18,11 @@ void UBTService_FindNearestEnemy::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 
 	OwningPawn = AIOwner->GetPawn();
     OwningPawnCombat = Cast<ICombatInterface>(OwningPawn);
+
+	IOutlineInterface* OwningOutLine = Cast<IOutlineInterface>(OwningPawn);
+
+	if (OwningOutLine == nullptr) return;
+	if (!OwningOutLine->GetIsOnBoard()) return;
     if (OwningPawnCombat == nullptr) return;
     if (OwningPawnCombat->GetObjectType() == EObjectType::EOT_NONE) return;
 
@@ -34,9 +41,13 @@ void UBTService_FindNearestEnemy::CheckEnemies(TArray<AActor*> ActorArray)
 	for (AActor* detected : ActorArray)
 	{
 		ICombatInterface* DetectedCombat = Cast<ICombatInterface>(detected);
-		if (DetectedCombat)
+		IOutlineInterface* DetectedOutLine = Cast<IOutlineInterface>(detected);
+
+		if (DetectedCombat && DetectedOutLine)
 		{
-			if (OwningPawnCombat->GetObjectType() != DetectedCombat->GetObjectType() && DetectedCombat->GetObjectType() != EObjectType::EOT_NONE)
+			if (OwningPawnCombat->GetObjectType() != DetectedCombat->GetObjectType() 
+				&& DetectedCombat->GetObjectType() != EObjectType::EOT_NONE 
+				&& DetectedOutLine->GetIsOnBoard())
 			{
 				float dist = FVector::Dist(detected->GetActorLocation(), OwningPawn->GetActorLocation());
 				EnemyMap.Emplace(detected, dist);
