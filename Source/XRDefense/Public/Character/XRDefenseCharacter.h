@@ -5,14 +5,17 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interaction/OutlineInterface.h"
+#include "Interaction/CombatInterface.h"
 
 #include "XRDefenseCharacter.generated.h"
 
 class UWidgetComponent;
 class UHealthBarWidget;
+class UBehaviorTree;
+class AXRDefenceAIController;
 
 UCLASS()
-class XRDEFENSE_API AXRDefenseCharacter : public ACharacter, public IOutlineInterface
+class XRDEFENSE_API AXRDefenseCharacter : public ACharacter, public IOutlineInterface, public ICombatInterface
 {
 	GENERATED_BODY()
 
@@ -41,6 +44,9 @@ protected:
 	UHealthBarWidget* HealthBarWidget;
 
 	void UpdateHealthBarWidget();
+
+	virtual void PossessedBy(AController* NewController) override;
+
 
 private:
 	UPROPERTY(EditAnyWhere)
@@ -78,6 +84,20 @@ private:
 	bool CheckBeneathIsPlacableArea(FVector StartPoint);
 
 
+	UPROPERTY(EditAnywhere)
+	UBehaviorTree* BehaviorTree;
+
+	UPROPERTY()
+	AXRDefenceAIController* XRDefenceAIController;
+
+
+	UPROPERTY(EditAnyWhere)
+	float DetectRadius;
+
+	UPROPERTY(EditAnyWhere)
+	float DetectAngle;
+
+
 public:	
 	
 	FORCEINLINE virtual bool GetIsHighlighted() override { return bIsHighlighted; }
@@ -89,5 +109,6 @@ public:
 	FORCEINLINE float GetHealth() { return Health; }
 	FORCEINLINE float GetMaxHealth() { return MaxHealth; }
 
+	FORCEINLINE virtual EObjectType GetObjectType() override { return objectType; }
 
 };

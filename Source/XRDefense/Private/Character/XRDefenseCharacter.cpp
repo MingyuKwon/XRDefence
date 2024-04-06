@@ -4,6 +4,10 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "HUD/HealthBarWidget.h"
+#include "AI/XRDefenceAIController.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
+
 
 
 AXRDefenseCharacter::AXRDefenseCharacter()
@@ -14,7 +18,7 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
 	// 몬스터 에셋은 충돌을 아예 없앰
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
@@ -63,6 +67,22 @@ void AXRDefenseCharacter::BeginPlay()
 	SetHighLightShowEnable(false);
 }
 
+void AXRDefenseCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (BehaviorTree && NewController)
+	{
+		XRDefenceAIController = Cast<AXRDefenceAIController>(NewController);
+		if (XRDefenceAIController)
+		{
+			XRDefenceAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+			XRDefenceAIController->RunBehaviorTree(BehaviorTree);
+		}
+	}
+	
+}
+
 void AXRDefenseCharacter::UpdateHealthBarWidget()
 {
 	if (HealthWidgetComponent == nullptr) return;
@@ -71,9 +91,6 @@ void AXRDefenseCharacter::UpdateHealthBarWidget()
 	
 	if (HealthBarWidget)
 	{
-		FString str2 = FString::Printf(TEXT("UpdateHealthBarWidget IN"));
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, *str2);
-
 		HealthBarWidget->SetHealthBarPercent(Health / MaxHealth);
 	}
 }
