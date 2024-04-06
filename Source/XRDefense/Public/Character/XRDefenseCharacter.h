@@ -92,11 +92,7 @@ private:
 
 
 	UPROPERTY(EditAnyWhere)
-	float DetectRadius;
-
-	UPROPERTY(EditAnyWhere)
-	float DetectAngle;
-
+	float AttackRange;
 
 public:	
 	
@@ -110,5 +106,9 @@ public:
 	FORCEINLINE float GetMaxHealth() { return MaxHealth; }
 
 	FORCEINLINE virtual EObjectType GetObjectType() override { return objectType; }
+
+	UFUNCTION(BlueprintCallable)
+	virtual float GetAttackRange() override { return AttackRange; }
+
 
 };

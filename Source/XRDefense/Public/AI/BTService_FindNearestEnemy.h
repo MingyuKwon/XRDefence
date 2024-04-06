@@ -30,4 +30,5 @@ private:
 
 	APawn* OwningPawn;
 	class ICombatInterface* OwningPawnCombat;
+	class IOutlineInterface* OwningOutLine;
 };

@@ -18,8 +18,7 @@ void UBTService_FindNearestEnemy::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 
 	OwningPawn = AIOwner->GetPawn();
     OwningPawnCombat = Cast<ICombatInterface>(OwningPawn);
-
-	IOutlineInterface* OwningOutLine = Cast<IOutlineInterface>(OwningPawn);
+	OwningOutLine = Cast<IOutlineInterface>(OwningPawn);
 
 	if (OwningOutLine == nullptr) return;
 	if (!OwningOutLine->GetIsOnBoard()) return;
@@ -74,7 +73,15 @@ void UBTService_FindNearestEnemy::CheckEnemies(TArray<AActor*> ActorArray)
 	if (ClosestEnemy)
 	{
 		FString str = FString::Printf(TEXT("%s : %f"), *ClosestEnemy->GetName(), MinDistance);
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, *str);
+		if (OwningPawnCombat->GetObjectType() == EObjectType::EOT_ATTACKER)
+		{
+			GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Red , *str);
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(2, 1.f, FColor::Blue, *str);
+
+		}
 	}
 
 }
