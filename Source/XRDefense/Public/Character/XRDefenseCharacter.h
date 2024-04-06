@@ -8,6 +8,7 @@
 
 #include "XRDefenseCharacter.generated.h"
 
+class UWidgetComponent;
 
 UCLASS()
 class XRDEFENSE_API AXRDefenseCharacter : public ACharacter, public IOutlineInterface
@@ -26,12 +27,25 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-private:
-	UPROPERTY(EditAnyWhere)
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly)
 	EObjectType objectType;
 
 	UPROPERTY(VisibleAnyWhere)
 	UStaticMeshComponent* CharacterFloorMesh;
+
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly)
+	UWidgetComponent* HealthWidgetComponent;
+
+
+private:
+	UPROPERTY(EditAnyWhere)
+	float Health = 100.f;
+
+	UPROPERTY(EditAnyWhere)
+	float MaxHealth = 100.f;
+
+
+
 
 	UPROPERTY(EditAnyWhere)
 	UStaticMesh* DefenseCircle;
@@ -68,6 +82,9 @@ public:
 	virtual void SetIsOnBoard(bool isOnBoard) override;
 
 	virtual void SetActorPosition(FVector Position) override;
+
+	FORCEINLINE float GetHealth() { return Health; }
+	FORCEINLINE float GetMaxHealth() { return MaxHealth; }
 
 
 };

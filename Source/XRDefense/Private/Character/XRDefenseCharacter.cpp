@@ -2,6 +2,8 @@
 #include "Character/XRDefenseCharacter.h"
 #include "XRDefense/XRDefense.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
+
 
 AXRDefenseCharacter::AXRDefenseCharacter()
 {
@@ -17,6 +19,11 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 
 	CharacterFloorMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("Floor Mesh"));
 	CharacterFloorMesh->SetupAttachment(GetMesh());
+
+	HealthWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(FName("Health Bar"));
+	HealthWidgetComponent->SetupAttachment(RootComponent);
+
+
 }
 
 void AXRDefenseCharacter::BeginPlay()
