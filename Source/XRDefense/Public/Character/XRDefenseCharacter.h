@@ -9,6 +9,7 @@
 #include "XRDefenseCharacter.generated.h"
 
 class UWidgetComponent;
+class UHealthBarWidget;
 
 UCLASS()
 class XRDEFENSE_API AXRDefenseCharacter : public ACharacter, public IOutlineInterface
@@ -36,6 +37,10 @@ protected:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly)
 	UWidgetComponent* HealthWidgetComponent;
 
+	UPROPERTY()
+	UHealthBarWidget* HealthBarWidget;
+
+	void UpdateHealthBarWidget();
 
 private:
 	UPROPERTY(EditAnyWhere)
@@ -43,8 +48,6 @@ private:
 
 	UPROPERTY(EditAnyWhere)
 	float MaxHealth = 100.f;
-
-
 
 
 	UPROPERTY(EditAnyWhere)

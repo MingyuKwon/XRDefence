@@ -3,6 +3,7 @@
 #include "XRDefense/XRDefense.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
+#include "HUD/HealthBarWidget.h"
 
 
 AXRDefenseCharacter::AXRDefenseCharacter()
@@ -22,7 +23,6 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 
 	HealthWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(FName("Health Bar"));
 	HealthWidgetComponent->SetupAttachment(RootComponent);
-
 
 }
 
@@ -58,7 +58,24 @@ void AXRDefenseCharacter::BeginPlay()
 	FloorMeshFirstStartPosition = CharacterFloorMesh->GetComponentLocation();
 	LastPlacablePosition = GetActorLocation();
 
+	UpdateHealthBarWidget();
+
 	SetHighLightShowEnable(false);
+}
+
+void AXRDefenseCharacter::UpdateHealthBarWidget()
+{
+	if (HealthWidgetComponent == nullptr) return;
+
+	HealthBarWidget = HealthBarWidget == nullptr ? Cast<UHealthBarWidget>(HealthWidgetComponent->GetUserWidgetObject()) : HealthBarWidget;
+	
+	if (HealthBarWidget)
+	{
+		FString str2 = FString::Printf(TEXT("UpdateHealthBarWidget IN"));
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, *str2);
+
+		HealthBarWidget->SetHealthBarPercent(Health / MaxHealth);
+	}
 }
 
 
@@ -134,9 +151,6 @@ void AXRDefenseCharacter::SetActorPosition(FVector Position)
 	// 지금 놓으려는 공간이 캐릭터를 놓을 수 없는 공간이라면
 	if (!CheckBeneathIsPlacableArea(FinalPosition))
 	{
-		FString str = FString::Printf(TEXT("Cannot Place"));
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, *str);
-
 		// 놓을 수 있는 공간중에서 가장 가까운 곳을 찾아야 할 것이다
 		FinalPosition = LastPlacablePosition;
 	}
