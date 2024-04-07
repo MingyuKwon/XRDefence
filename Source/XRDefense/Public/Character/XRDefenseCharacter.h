@@ -79,6 +79,10 @@ private:
 
 	UPROPERTY(EditAnyWhere)
 	UAnimMontage* DeathMontage;
+
+
+	UPROPERTY(EditAnyWhere)
+	UAnimMontage* HitMontage;
 	//Animation
 
 

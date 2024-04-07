@@ -97,6 +97,7 @@ float AXRDefenseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	UpdateHealthBarWidget();
 
+
 	if (Health <= 0)
 	{
 		Death();
