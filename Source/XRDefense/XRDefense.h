@@ -15,3 +15,14 @@
 #define ECC_DeffenceFieldTraceChannel ECC_GameTraceChannel4
 
 
+UENUM(BlueprintType)
+enum class EObjectType : uint8
+{
+	EOT_NONE,
+	EOT_ATTACKER,
+	EOT_DEFENDER,
+
+	EOT_MAX
+};
+
+

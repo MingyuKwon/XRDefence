@@ -4,22 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "XRDefense/XRDefense.h"
 #include "OutlineInterface.generated.h"
-
-UENUM(BlueprintType)
-enum class EObjectType : uint8 
-{
-	EOT_NONE,
-	EOT_ATTACKER,
-	EOT_DEFENDER,
-
-	EOT_MAX
-};
-
 
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, BlueprintType)
 class UOutlineInterface : public UInterface
 {
 	GENERATED_BODY()

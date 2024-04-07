@@ -1,7 +1,16 @@
-
 #include "Character/XRDefenseCharacter.h"
 #include "XRDefense/XRDefense.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
+#include "HUD/HealthBarWidget.h"
+#include "AI/XRDefenceAIController.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Animation/AnimMontage.h"
+#include "Kismet/GameplayStatics.h"
+#include "AI/BTTask_Attack.h"
+
+
 
 AXRDefenseCharacter::AXRDefenseCharacter()
 {
@@ -9,14 +18,21 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 	  
 	// 전체적인 충격 감지 캡슐은 카메라와 부딪히지 않도록 함
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
 
 	// 몬스터 에셋은 충돌을 아예 없앰
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
 	CharacterFloorMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("Floor Mesh"));
 	CharacterFloorMesh->SetupAttachment(GetMesh());
+
+	HealthWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(FName("Health Bar"));
+	HealthWidgetComponent->SetupAttachment(RootComponent);
+
 }
 
 void AXRDefenseCharacter::BeginPlay()
@@ -51,7 +67,56 @@ void AXRDefenseCharacter::BeginPlay()
 	FloorMeshFirstStartPosition = CharacterFloorMesh->GetComponentLocation();
 	LastPlacablePosition = GetActorLocation();
 
+	UpdateHealthBarWidget();
+
 	SetHighLightShowEnable(false);
+}
+
+void AXRDefenseCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (BehaviorTree && NewController)
+	{
+		XRDefenceAIController = Cast<AXRDefenceAIController>(NewController);
+		if (XRDefenceAIController)
+		{
+			XRDefenceAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+			XRDefenceAIController->RunBehaviorTree(BehaviorTree);
+		}
+	}
+	
+}
+
+float AXRDefenseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	Health -= ActualDamage;
+	Health = FMath::Clamp(Health, 0, MaxHealth);
+
+	UpdateHealthBarWidget();
+
+
+	if (Health <= 0)
+	{
+		Death();
+	}
+
+	return ActualDamage;
+	
+}
+
+void AXRDefenseCharacter::UpdateHealthBarWidget()
+{
+	if (HealthWidgetComponent == nullptr) return;
+
+	HealthBarWidget = HealthBarWidget == nullptr ? Cast<UHealthBarWidget>(HealthWidgetComponent->GetUserWidgetObject()) : HealthBarWidget;
+	
+	if (HealthBarWidget)
+	{
+		HealthBarWidget->SetHealthBarPercent(Health / MaxHealth);
+	}
 }
 
 
@@ -103,6 +168,7 @@ void AXRDefenseCharacter::SetHighLightOff()
 	bIsHighlighted = false;
 }
 
+
 void AXRDefenseCharacter::SetIsOnBoard(bool isOnBoard)
 {
 	bIsOnBoard = isOnBoard;
@@ -122,20 +188,63 @@ void AXRDefenseCharacter::SetActorPosition(FVector Position)
 {
 	FVector FinalPosition = Position;
 
-
-
 	// 지금 놓으려는 공간이 캐릭터를 놓을 수 없는 공간이라면
 	if (!CheckBeneathIsPlacableArea(FinalPosition))
 	{
-		FString str = FString::Printf(TEXT("Cannot Place"));
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, *str);
-
 		// 놓을 수 있는 공간중에서 가장 가까운 곳을 찾아야 할 것이다
 		FinalPosition = LastPlacablePosition;
 	}
 
 	LastPlacablePosition = FinalPosition;
 	SetActorLocation(FinalPosition);
+
+}
+
+void AXRDefenseCharacter::Attack()
+{
+	if (AttackMontage)
+	{
+		isAttacking = true;
+		PlayAnimMontage(AttackMontage);
+	}
+
+}
+
+
+void AXRDefenseCharacter::AttackEnd()
+{
+	isAttacking = false;
+}
+
+void AXRDefenseCharacter::ApplyAttackDamage()
+{	
+	UGameplayStatics::ApplyDamage(CombatTarget, AttackDamage, GetController(), this, UDamageType::StaticClass());
+}
+
+void AXRDefenseCharacter::FireBullet()
+{
+
+}
+
+void AXRDefenseCharacter::Death()
+{
+	if (isDead) return;
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	isDead = true;
+
+	if (DeathMontage)
+	{
+		PlayAnimMontage(DeathMontage);
+	}
+
+
+	FString str = FString::Printf(TEXT("FireBullet : %f"), DeathTime);
+	GEngine->AddOnScreenDebugMessage(6, 1.f, FColor::Yellow, *str);
+
+	SetLifeSpan(DeathTime);
 
 }
 
