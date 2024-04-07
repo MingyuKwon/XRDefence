@@ -30,5 +30,13 @@ public:
 	virtual EObjectType GetObjectType() = 0;
 	virtual float GetAttackRange() = 0;
 
-	virtual void Attack(FOnAttackFinished OnAttackFinished) = 0;
+	virtual bool GetIsAttacking() = 0;
+
+
+	virtual AActor* GetCombatTarget() = 0;
+	virtual void SetCombatTarget(AActor* target) = 0;
+
+	virtual void Attack() = 0;
+
+
 };

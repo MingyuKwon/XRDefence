@@ -6,7 +6,6 @@
 #include "GameFramework/Character.h"
 #include "Interaction/OutlineInterface.h"
 #include "Interaction/CombatInterface.h"
-
 #include "XRDefenseCharacter.generated.h"
 
 class UWidgetComponent;
@@ -47,6 +46,9 @@ protected:
 
 	virtual void PossessedBy(AController* NewController) override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+
 
 private:
 	UPROPERTY(EditAnyWhere)
@@ -54,6 +56,8 @@ private:
 
 	UPROPERTY(EditAnyWhere)
 	float MaxHealth = 100.f;
+
+	bool isAttacking = false;
 
 
 	UPROPERTY(EditAnyWhere)
@@ -101,10 +105,19 @@ private:
 	UPROPERTY(EditAnyWhere)
 	float AttackRange;
 
-	FOnAttackFinished AttackFinishedDelegate;
+	UPROPERTY(EditAnyWhere)
+	float AttackDamage;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void AttackEnd();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void ApplyAttackDamage();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void FireBullet();
+
+	AActor* CombatTarget = nullptr;
 
 
 public:	
@@ -122,12 +135,19 @@ public:
 	FORCEINLINE float GetMaxHealth() { return MaxHealth; }
 
 	// CombatInterface
+	
 	FORCEINLINE virtual EObjectType GetObjectType() override { return objectType; }
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool GetIsAttacking() override { return isAttacking; };
+
+	FORCEINLINE virtual AActor* GetCombatTarget() { return CombatTarget; }
+	FORCEINLINE virtual void SetCombatTarget(AActor* target) { CombatTarget = target; }
 
 	UFUNCTION(BlueprintCallable)
 	virtual float GetAttackRange() override { return AttackRange; }
 
-	virtual void Attack(FOnAttackFinished OnAttackFinished) override;
+	virtual void Attack() override;
 	// CombatInterface
 
 

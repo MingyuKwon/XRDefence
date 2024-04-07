@@ -23,6 +23,9 @@ void UBTService_FindNearestEnemy::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 	if (OwningOutLine == nullptr) return;
 	if (!OwningOutLine->GetIsOnBoard()) return;
     if (OwningPawnCombat == nullptr) return;
+
+	OwningPawnCombat->SetCombatTarget(nullptr);
+
     if (OwningPawnCombat->GetObjectType() == EObjectType::EOT_NONE) return;
 
 	TArray<AActor*> ActorArray;
@@ -34,6 +37,8 @@ void UBTService_FindNearestEnemy::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 
 void UBTService_FindNearestEnemy::CheckEnemies(TArray<AActor*> ActorArray)
 {
+	OwningPawnCombat->SetCombatTarget(nullptr);
+
 	TMap<AActor*, float> EnemyMap;
 
 	// ¿ì¼± ÀÚ±â¿Í ´Ù¸¥ ÆÀµéÀ» ½Ï ¸Ê¿¡ ´ãÀ½
@@ -67,6 +72,7 @@ void UBTService_FindNearestEnemy::CheckEnemies(TArray<AActor*> ActorArray)
 		}
 	}
 
+	OwningPawnCombat->SetCombatTarget(ClosestEnemy);
 	UBTFunctionLibrary::SetBlackboardValueAsObject(this, TargetToFollowSelector, ClosestEnemy);
 	UBTFunctionLibrary::SetBlackboardValueAsFloat(this, DistanceToTargeSelector, MinDistance);
 
@@ -75,11 +81,11 @@ void UBTService_FindNearestEnemy::CheckEnemies(TArray<AActor*> ActorArray)
 		FString str = FString::Printf(TEXT("%s : %f"), *ClosestEnemy->GetName(), MinDistance);
 		if (OwningPawnCombat->GetObjectType() == EObjectType::EOT_ATTACKER)
 		{
-			GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Red , *str);
+			//GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Red , *str);
 		}
 		else
 		{
-			GEngine->AddOnScreenDebugMessage(2, 1.f, FColor::Blue, *str);
+			//GEngine->AddOnScreenDebugMessage(2, 1.f, FColor::Blue, *str);
 
 		}
 	}

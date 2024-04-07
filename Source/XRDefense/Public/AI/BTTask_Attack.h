@@ -17,8 +17,6 @@ class XRDEFENSE_API UBTTask_Attack : public UBTTask_BlueprintBase
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
-	void OnAttackFinished(bool bSuccess);
-
 };
 
  

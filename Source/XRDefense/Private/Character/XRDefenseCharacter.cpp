@@ -1,4 +1,3 @@
-
 #include "Character/XRDefenseCharacter.h"
 #include "XRDefense/XRDefense.h"
 #include "Components/CapsuleComponent.h"
@@ -8,7 +7,8 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Animation/AnimMontage.h"
-
+#include "Kismet/GameplayStatics.h"
+#include "AI/BTTask_Attack.h"
 
 
 
@@ -18,10 +18,13 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 	  
 	// 전체적인 충격 감지 캡슐은 카메라와 부딪히지 않도록 함
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
 
 	// 몬스터 에셋은 충돌을 아예 없앰
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
 	CharacterFloorMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("Floor Mesh"));
@@ -82,6 +85,24 @@ void AXRDefenseCharacter::PossessedBy(AController* NewController)
 			XRDefenceAIController->RunBehaviorTree(BehaviorTree);
 		}
 	}
+	
+}
+
+float AXRDefenseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	Health -= ActualDamage;
+	Health = FMath::Clamp(Health, 0, MaxHealth);
+
+	UpdateHealthBarWidget();
+
+	if (Health <= 0)
+	{
+		Destroy();
+	}
+
+	return ActualDamage;
 	
 }
 
@@ -178,12 +199,11 @@ void AXRDefenseCharacter::SetActorPosition(FVector Position)
 
 }
 
-void AXRDefenseCharacter::Attack(FOnAttackFinished OnAttackFinished)
+void AXRDefenseCharacter::Attack()
 {
 	if (AttackMontage)
 	{
-		AttackFinishedDelegate = OnAttackFinished;
-
+		isAttacking = true;
 		PlayAnimMontage(AttackMontage);
 	}
 
@@ -192,9 +212,19 @@ void AXRDefenseCharacter::Attack(FOnAttackFinished OnAttackFinished)
 
 void AXRDefenseCharacter::AttackEnd()
 {
+	isAttacking = false;
+}
 
-	AttackFinishedDelegate.ExecuteIfBound(true);
-	AttackFinishedDelegate = nullptr;
+void AXRDefenseCharacter::ApplyAttackDamage()
+{	
+	UGameplayStatics::ApplyDamage(CombatTarget, AttackDamage, GetController(), this, UDamageType::StaticClass());
+}
+
+void AXRDefenseCharacter::FireBullet()
+{
+	FString str = FString::Printf(TEXT("FireBullet : %s"), *GetName());
+	GEngine->AddOnScreenDebugMessage(6, 1.f, FColor::Yellow, *str);
+
 }
 
 bool AXRDefenseCharacter::CheckBeneathIsPlacableArea(FVector StartPoint)

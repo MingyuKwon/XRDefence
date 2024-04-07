@@ -7,6 +7,7 @@
 
 EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
+
     AAIController* AIController = OwnerComp.GetAIOwner();
     if (AIController == nullptr) return EBTNodeResult::Failed;
 
@@ -17,21 +18,10 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
     if (Combat == nullptr) return EBTNodeResult::Failed;
 
     // 비동기 공격 시작. 공격 완료 시 OnAttackFinished 콜백 호출 예정
-    Combat->Attack(FOnAttackFinished::CreateUObject(this, &UBTTask_Attack::OnAttackFinished));
+    Combat->Attack();
 
     // 태스크가 진행 중임을 알림. 실제 완료는 콜백에서 처리됨
     return EBTNodeResult::InProgress;
 }
 
-// 공격 완료 콜백
-void UBTTask_Attack::OnAttackFinished(bool bSuccess)
-{
-    if (bSuccess)
-    {
-        FinishExecute(true); // 성공적으로 완료
-    }
-    else
-    {
-        FinishExecute(false); // 실패로 완료
-    }
-}
+
