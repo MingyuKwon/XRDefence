@@ -69,6 +69,13 @@ private:
 
 	FVector LastPlacablePosition;
 
+	//Animation
+	UPROPERTY(EditAnyWhere)
+	UAnimMontage* AttackMontage;
+
+	//Animation
+
+
 	UPROPERTY(VisibleAnyWhere)
 	bool bIsHighlighted;
 
@@ -94,21 +101,34 @@ private:
 	UPROPERTY(EditAnyWhere)
 	float AttackRange;
 
+	FOnAttackFinished AttackFinishedDelegate;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void AttackEnd();
+
+
 public:	
 	
+	// OutlineINterface
 	FORCEINLINE virtual bool GetIsHighlighted() override { return bIsHighlighted; }
 	FORCEINLINE virtual bool GetIsOnBoard() override { return bIsOnBoard; }
 	virtual void SetIsOnBoard(bool isOnBoard) override;
 
 	virtual void SetActorPosition(FVector Position) override;
 
+	// OutlineINterface
+
 	FORCEINLINE float GetHealth() { return Health; }
 	FORCEINLINE float GetMaxHealth() { return MaxHealth; }
 
+	// CombatInterface
 	FORCEINLINE virtual EObjectType GetObjectType() override { return objectType; }
 
 	UFUNCTION(BlueprintCallable)
 	virtual float GetAttackRange() override { return AttackRange; }
+
+	virtual void Attack(FOnAttackFinished OnAttackFinished) override;
+	// CombatInterface
 
 
 };

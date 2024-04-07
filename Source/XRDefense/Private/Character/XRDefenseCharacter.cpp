@@ -7,6 +7,8 @@
 #include "AI/XRDefenceAIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Animation/AnimMontage.h"
+
 
 
 
@@ -144,6 +146,7 @@ void AXRDefenseCharacter::SetHighLightOff()
 	bIsHighlighted = false;
 }
 
+
 void AXRDefenseCharacter::SetIsOnBoard(bool isOnBoard)
 {
 	bIsOnBoard = isOnBoard;
@@ -163,8 +166,6 @@ void AXRDefenseCharacter::SetActorPosition(FVector Position)
 {
 	FVector FinalPosition = Position;
 
-
-
 	// 지금 놓으려는 공간이 캐릭터를 놓을 수 없는 공간이라면
 	if (!CheckBeneathIsPlacableArea(FinalPosition))
 	{
@@ -175,6 +176,25 @@ void AXRDefenseCharacter::SetActorPosition(FVector Position)
 	LastPlacablePosition = FinalPosition;
 	SetActorLocation(FinalPosition);
 
+}
+
+void AXRDefenseCharacter::Attack(FOnAttackFinished OnAttackFinished)
+{
+	if (AttackMontage)
+	{
+		AttackFinishedDelegate = OnAttackFinished;
+
+		PlayAnimMontage(AttackMontage);
+	}
+
+}
+
+
+void AXRDefenseCharacter::AttackEnd()
+{
+
+	AttackFinishedDelegate.ExecuteIfBound(true);
+	AttackFinishedDelegate = nullptr;
 }
 
 bool AXRDefenseCharacter::CheckBeneathIsPlacableArea(FVector StartPoint)

@@ -7,6 +7,10 @@
 #include "XRDefense/XRDefense.h"
 #include "CombatInterface.generated.h"
 
+
+DECLARE_DELEGATE_OneParam(FOnAttackFinished, bool /* bSuccess */);
+
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, BlueprintType)
 class UCombatInterface : public UInterface
@@ -25,4 +29,6 @@ class XRDEFENSE_API ICombatInterface
 public:
 	virtual EObjectType GetObjectType() = 0;
 	virtual float GetAttackRange() = 0;
+
+	virtual void Attack(FOnAttackFinished OnAttackFinished) = 0;
 };

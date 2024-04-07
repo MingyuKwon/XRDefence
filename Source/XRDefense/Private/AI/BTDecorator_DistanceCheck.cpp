@@ -34,10 +34,6 @@ bool UBTDecorator_DistanceCheck::CalculateRawConditionValue(UBehaviorTreeCompone
     float FirstValue = Combat->GetAttackRange();
     float SecondValue = DIstanceValue;
 
-
-    FString str = FString::Printf(TEXT("%f : %f"), FirstValue, SecondValue);
-    GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Orange , *str);
-
     // °ª ºñ±³
     return FirstValue >= SecondValue; 
 }
