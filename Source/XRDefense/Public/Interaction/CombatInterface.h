@@ -31,7 +31,7 @@ public:
 	virtual float GetAttackRange() = 0;
 
 	virtual bool GetIsAttacking() = 0;
-
+	virtual bool GetisDead() = 0;
 
 	virtual AActor* GetCombatTarget() = 0;
 	virtual void SetCombatTarget(AActor* target) = 0;

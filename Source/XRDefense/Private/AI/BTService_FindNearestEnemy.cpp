@@ -51,7 +51,10 @@ void UBTService_FindNearestEnemy::CheckEnemies(TArray<AActor*> ActorArray)
 		{
 			if (OwningPawnCombat->GetObjectType() != DetectedCombat->GetObjectType() 
 				&& DetectedCombat->GetObjectType() != EObjectType::EOT_NONE 
-				&& DetectedOutLine->GetIsOnBoard())
+				&& DetectedOutLine->GetIsOnBoard()
+				&& !DetectedCombat->GetisDead()
+				
+				)
 			{
 				float dist = FVector::Dist(detected->GetActorLocation(), OwningPawn->GetActorLocation());
 				EnemyMap.Emplace(detected, dist);

@@ -99,7 +99,7 @@ float AXRDefenseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	if (Health <= 0)
 	{
-		Destroy();
+		Death();
 	}
 
 	return ActualDamage;
@@ -222,8 +222,28 @@ void AXRDefenseCharacter::ApplyAttackDamage()
 
 void AXRDefenseCharacter::FireBullet()
 {
-	FString str = FString::Printf(TEXT("FireBullet : %s"), *GetName());
+
+}
+
+void AXRDefenseCharacter::Death()
+{
+	if (isDead) return;
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	isDead = true;
+
+	if (DeathMontage)
+	{
+		PlayAnimMontage(DeathMontage);
+	}
+
+
+	FString str = FString::Printf(TEXT("FireBullet : %f"), DeathTime);
 	GEngine->AddOnScreenDebugMessage(6, 1.f, FColor::Yellow, *str);
+
+	SetLifeSpan(DeathTime);
 
 }
 

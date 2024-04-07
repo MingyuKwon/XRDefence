@@ -77,6 +77,8 @@ private:
 	UPROPERTY(EditAnyWhere)
 	UAnimMontage* AttackMontage;
 
+	UPROPERTY(EditAnyWhere)
+	UAnimMontage* DeathMontage;
 	//Animation
 
 
@@ -108,6 +110,10 @@ private:
 	UPROPERTY(EditAnyWhere)
 	float AttackDamage;
 
+
+	UPROPERTY(EditAnyWhere)
+	float DeathTime;
+
 	UFUNCTION(BlueprintCallable)
 	virtual void AttackEnd();
 
@@ -119,6 +125,9 @@ private:
 
 	AActor* CombatTarget = nullptr;
 
+	bool isDead = false;
+
+	void Death();
 
 public:	
 	
@@ -146,6 +155,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual float GetAttackRange() override { return AttackRange; }
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool GetisDead() override { return isDead; }
 
 	virtual void Attack() override;
 	// CombatInterface
