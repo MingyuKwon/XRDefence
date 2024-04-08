@@ -12,6 +12,7 @@ class UWidgetComponent;
 class UHealthBarWidget;
 class UBehaviorTree;
 class AXRDefenceAIController;
+class AProjectile;
 
 UCLASS()
 class XRDEFENSE_API AXRDefenseCharacter : public ACharacter, public IOutlineInterface, public ICombatInterface
@@ -107,6 +108,8 @@ private:
 	UPROPERTY()
 	AXRDefenceAIController* XRDefenceAIController;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AProjectile> BulletClass;
 
 	UPROPERTY(EditAnyWhere)
 	float AttackRange;

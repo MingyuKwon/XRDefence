@@ -10,7 +10,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "AI/BTTask_Attack.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "Engine/SkeletalMeshSocket.h"
+#include "Battle/Projectile.h"
 
 
 AXRDefenseCharacter::AXRDefenseCharacter()
@@ -232,7 +233,27 @@ void AXRDefenseCharacter::ApplyAttackDamage()
 
 void AXRDefenseCharacter::FireBullet()
 {
+	const USkeletalMeshSocket* MuzzleSocket = GetMesh()->GetSocketByName(FName("Muzzle_Front"));
+	if (MuzzleSocket)
+	{
+		FTransform MuzzleTransform = MuzzleSocket->GetSocketTransform(GetMesh());
+		FVector ToTarget = CombatTarget->GetActorLocation() - MuzzleTransform.GetLocation();
+		FRotator ToTargetRotation = ToTarget.Rotation();
 
+		if (BulletClass)
+		{
+			AProjectile* Bullet =  GetWorld()->SpawnActor<AProjectile>(
+				BulletClass,
+				MuzzleTransform.GetLocation(),
+				ToTargetRotation
+			);
+
+			Bullet->SetTarget(CombatTarget);
+			Bullet->SetDamage(AttackDamage);
+
+		}
+	}
+	
 }
 
 void AXRDefenseCharacter::Death()
