@@ -17,6 +17,6 @@ AXRDefenceAIController::AXRDefenceAIController(const FObjectInitializer& ObjectI
 	BehaviorTreeComponent = CreateDefaultSubobject<UBehaviorTreeComponent>(FName("BehaviorTreeComponent"));
 	check(BehaviorTreeComponent);
 
-
+	CrowdComp = Cast<UCrowdFollowingComponent>(GetPathFollowingComponent());
 
 }

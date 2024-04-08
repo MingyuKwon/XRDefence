@@ -25,4 +25,6 @@ protected:
 
 	UPROPERTY()
 	UBehaviorTreeComponent* BehaviorTreeComponent;
+
+	class UCrowdFollowingComponent* CrowdComp;
 };

@@ -20,6 +20,7 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 	// 전체적인 충격 감지 캡슐은 카메라와 부딪히지 않도록 함
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
 
 	// 몬스터 에셋은 충돌을 아예 없앰
@@ -31,12 +32,15 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 	CharacterFloorMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("Floor Mesh"));
 	CharacterFloorMesh->SetupAttachment(GetMesh());
 
+	CharacterFloorMesh->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+	CharacterFloorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CharacterFloorMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	CharacterFloorMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	CharacterFloorMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+
 	HealthWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(FName("Health Bar"));
 	HealthWidgetComponent->SetupAttachment(RootComponent);
 
-	GetCharacterMovement()->bUseRVOAvoidance = true;
-	GetCharacterMovement()->AvoidanceWeight = 3.f; 
-	GetCharacterMovement()->AvoidanceConsiderationRadius = 1000.0f; 
 
 }
 
