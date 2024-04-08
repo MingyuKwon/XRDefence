@@ -19,17 +19,23 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere)
-	class UProjectileMovementComponent* ProjectileMovement;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UNotHitSelf_PMC* Projectile_Movement;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* BulletMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UCapsuleComponent* Capsule;
 
 private:
 	UPROPERTY(EditAnywhere)
 	float shotSpeed;
 
 	float BulletDamage = 0.f;
+
+	UFUNCTION(BlueprintCallable)
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 public:	
 	// Called every frame

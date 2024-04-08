@@ -12,6 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Battle/Projectile.h"
+#include "XRDefense/XRDefense.h"
 
 
 AXRDefenseCharacter::AXRDefenseCharacter()
@@ -29,6 +30,7 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_BulletTraceChannel, ECollisionResponse::ECR_Block);
 
 	CharacterFloorMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("Floor Mesh"));
 	CharacterFloorMesh->SetupAttachment(GetMesh());
@@ -240,12 +242,17 @@ void AXRDefenseCharacter::FireBullet()
 		FVector ToTarget = CombatTarget->GetActorLocation() - MuzzleTransform.GetLocation();
 		FRotator ToTargetRotation = ToTarget.Rotation();
 
+		FActorSpawnParameters SpawnParam;
+		SpawnParam.Instigator = GetInstigator();
+		SpawnParam.Owner = this;
+
 		if (BulletClass)
 		{
 			AProjectile* Bullet =  GetWorld()->SpawnActor<AProjectile>(
 				BulletClass,
 				MuzzleTransform.GetLocation(),
-				ToTargetRotation
+				ToTargetRotation,
+				SpawnParam
 			);
 
 			Bullet->SetTarget(CombatTarget);
@@ -269,10 +276,6 @@ void AXRDefenseCharacter::Death()
 	{
 		PlayAnimMontage(DeathMontage);
 	}
-
-
-	FString str = FString::Printf(TEXT("FireBullet : %f"), DeathTime);
-	GEngine->AddOnScreenDebugMessage(6, 1.f, FColor::Yellow, *str);
 
 	SetLifeSpan(DeathTime);
 
