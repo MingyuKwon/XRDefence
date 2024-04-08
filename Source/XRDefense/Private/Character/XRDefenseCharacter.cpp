@@ -9,6 +9,7 @@
 #include "Animation/AnimMontage.h"
 #include "Kismet/GameplayStatics.h"
 #include "AI/BTTask_Attack.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 
@@ -22,7 +23,7 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 
 
 	// 몬스터 에셋은 충돌을 아예 없앰
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
@@ -32,6 +33,10 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 
 	HealthWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(FName("Health Bar"));
 	HealthWidgetComponent->SetupAttachment(RootComponent);
+
+	GetCharacterMovement()->bUseRVOAvoidance = true;
+	GetCharacterMovement()->AvoidanceWeight = 3.f; 
+	GetCharacterMovement()->AvoidanceConsiderationRadius = 1000.0f; 
 
 }
 

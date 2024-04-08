@@ -4,10 +4,13 @@
 #include "AI/XRDefenceAIController.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Navigation/CrowdFollowingComponent.h"
 
 
-AXRDefenceAIController::AXRDefenceAIController()
+AXRDefenceAIController::AXRDefenceAIController(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent"))) 
 {
+
 	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(FName("BlackboardComponent"));
 	check(Blackboard);
 

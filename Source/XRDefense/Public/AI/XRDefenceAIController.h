@@ -19,7 +19,7 @@ class XRDEFENSE_API AXRDefenceAIController : public AAIController
 	GENERATED_BODY()
 	
 public:
-	AXRDefenceAIController();
+	AXRDefenceAIController(const FObjectInitializer& ObjectInitializer);
 
 protected:
 
