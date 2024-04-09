@@ -15,6 +15,7 @@
 #include "XRDefense/XRDefense.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundBase.h"
+#include "Materials/MaterialInterface.h"
 
 
 AXRDefenseCharacter::AXRDefenseCharacter()
@@ -84,6 +85,10 @@ void AXRDefenseCharacter::BeginPlay()
 	UpdateHealthBarWidget();
 
 	SetHighLightShowEnable(false);
+
+
+	DefaultMaterial = GetMesh()->GetMaterial(0);
+
 }
 
 void AXRDefenseCharacter::PossessedBy(AController* NewController)
@@ -111,6 +116,14 @@ float AXRDefenseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	UpdateHealthBarWidget();
 
+	GetMesh()->SetMaterial(0, DamagedMaterial);
+
+	if (DamagedSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), DamagedSound, GetActorLocation());
+	}
+
+	DamageMaterialStartTimer(0.15f);
 
 	if (Health <= 0)
 	{
@@ -119,6 +132,16 @@ float AXRDefenseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	return ActualDamage;
 	
+}
+
+void AXRDefenseCharacter::DamageMaterialTimerExpired()
+{
+	GetMesh()->SetMaterial(0, DefaultMaterial);
+}
+
+void AXRDefenseCharacter::DamageMaterialStartTimer(float TimeDuration)
+{
+	GetWorld()->GetTimerManager().SetTimer(DamageMaterialTimerHandle, this, &AXRDefenseCharacter::DamageMaterialTimerExpired, TimeDuration, false);
 }
 
 void AXRDefenseCharacter::UpdateHealthBarWidget()
@@ -269,6 +292,8 @@ void AXRDefenseCharacter::Death()
 {
 	if (isDead) return;
 
+	GetMesh()->SetMaterial(0, DefaultMaterial);
+
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -315,6 +340,8 @@ bool AXRDefenseCharacter::CheckBeneathIsPlacableArea(FVector StartPoint)
 
 	return LinetraceResult.bBlockingHit;
 }
+
+
 
 void AXRDefenseCharacter::SetHighlightStencilValue()
 {
