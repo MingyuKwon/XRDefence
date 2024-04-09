@@ -13,6 +13,8 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Battle/Projectile.h"
 #include "XRDefense/XRDefense.h"
+#include "Particles/ParticleSystem.h"
+#include "Sound/SoundBase.h"
 
 
 AXRDefenseCharacter::AXRDefenseCharacter()
@@ -275,6 +277,16 @@ void AXRDefenseCharacter::Death()
 	if (DeathMontage)
 	{
 		PlayAnimMontage(DeathMontage);
+	}
+
+	if (DeathSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), DeathSound, GetActorLocation());
+	}
+
+	if (DeathParticle)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathParticle, GetActorLocation(), GetActorRotation());
 	}
 
 	SetLifeSpan(DeathTime);

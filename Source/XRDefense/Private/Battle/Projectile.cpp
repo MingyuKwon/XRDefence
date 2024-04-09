@@ -6,6 +6,8 @@
 #include "XRDefense/XRDefense.h"
 #include "Kismet/GameplayStatics.h"
 #include "Component/NotHitSelf_PMC.h"
+#include "Sound/SoundBase.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -55,6 +57,19 @@ void AProjectile::BeginPlay()
 {
     Super::BeginPlay();
     BulletDamage = 50;
+}
+
+void AProjectile::Destroyed()
+{
+    if (HitImpactSound)
+    {
+        UGameplayStatics::SpawnSoundAtLocation(GetWorld(), HitImpactSound, GetActorLocation());
+    }
+
+    if (HitImpactParticle)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitImpactParticle, GetActorLocation(), GetActorRotation());
+    }
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

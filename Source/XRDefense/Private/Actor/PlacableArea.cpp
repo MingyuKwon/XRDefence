@@ -28,25 +28,25 @@ void APlacableArea::BeginPlay()
 		if (DefaulteArea)
 		{
 			FloorMesh->SetStaticMesh(DefaulteArea);
-			FloorMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
-
 		}
+		FloorMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+
 		break;
 	case EObjectType::EOT_ATTACKER:
 		if (OffenceArea)
 		{
 			FloorMesh->SetStaticMesh(OffenceArea);
-			FloorMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_OffencerFieldTraceChannel, ECollisionResponse::ECR_Block);
-
 		}
+
+		FloorMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_OffencerFieldTraceChannel, ECollisionResponse::ECR_Block);
 		break;
+
 	case EObjectType::EOT_DEFENDER:
 		if (DefenceArea)
 		{
 			FloorMesh->SetStaticMesh(DefenceArea);
-			FloorMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_DeffenceFieldTraceChannel, ECollisionResponse::ECR_Block);
-
 		}
+		FloorMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_DeffenceFieldTraceChannel, ECollisionResponse::ECR_Block);
 		break;
 	}
 	

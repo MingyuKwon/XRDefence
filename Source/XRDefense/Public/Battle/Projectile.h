@@ -28,6 +28,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UCapsuleComponent* Capsule;
 
+	virtual void Destroyed() override;
+
 private:
 	UPROPERTY(EditAnywhere)
 	float shotSpeed;
@@ -36,6 +38,13 @@ private:
 
 	UFUNCTION(BlueprintCallable)
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* HitImpactSound;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* HitImpactParticle;
+
 
 public:	
 	// Called every frame

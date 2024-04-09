@@ -87,6 +87,14 @@ private:
 	//Animation
 
 
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* DeathParticle;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* DeathSound;
+
+
+
 	UPROPERTY(VisibleAnyWhere)
 	bool bIsHighlighted;
 
