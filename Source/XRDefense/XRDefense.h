@@ -13,6 +13,7 @@
 #define ECC_BoardTraceChannel ECC_GameTraceChannel2
 #define ECC_OffencerFieldTraceChannel ECC_GameTraceChannel3
 #define ECC_DeffenceFieldTraceChannel ECC_GameTraceChannel4
+#define ECC_BulletTraceChannel ECC_GameTraceChannel5
 
 
 UENUM(BlueprintType)

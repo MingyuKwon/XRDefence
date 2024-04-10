@@ -9,7 +9,13 @@
 #include "Animation/AnimMontage.h"
 #include "Kismet/GameplayStatics.h"
 #include "AI/BTTask_Attack.h"
-
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
+#include "Battle/Projectile.h"
+#include "XRDefense/XRDefense.h"
+#include "Particles/ParticleSystem.h"
+#include "Sound/SoundBase.h"
+#include "Materials/MaterialInterface.h"
 
 
 AXRDefenseCharacter::AXRDefenseCharacter()
@@ -19,19 +25,28 @@ AXRDefenseCharacter::AXRDefenseCharacter()
 	// 전체적인 충격 감지 캡슐은 카메라와 부딪히지 않도록 함
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
 
 	// 몬스터 에셋은 충돌을 아예 없앰
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_BulletTraceChannel, ECollisionResponse::ECR_Block);
 
 	CharacterFloorMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("Floor Mesh"));
 	CharacterFloorMesh->SetupAttachment(GetMesh());
 
+	CharacterFloorMesh->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+	CharacterFloorMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	CharacterFloorMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	CharacterFloorMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	CharacterFloorMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+
 	HealthWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(FName("Health Bar"));
 	HealthWidgetComponent->SetupAttachment(RootComponent);
+
 
 }
 
@@ -70,6 +85,10 @@ void AXRDefenseCharacter::BeginPlay()
 	UpdateHealthBarWidget();
 
 	SetHighLightShowEnable(false);
+
+
+	DefaultMaterial = GetMesh()->GetMaterial(0);
+
 }
 
 void AXRDefenseCharacter::PossessedBy(AController* NewController)
@@ -97,6 +116,14 @@ float AXRDefenseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	UpdateHealthBarWidget();
 
+	GetMesh()->SetMaterial(0, DamagedMaterial);
+
+	if (DamagedSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), DamagedSound, GetActorLocation());
+	}
+
+	DamageMaterialStartTimer(0.15f);
 
 	if (Health <= 0)
 	{
@@ -105,6 +132,16 @@ float AXRDefenseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	return ActualDamage;
 	
+}
+
+void AXRDefenseCharacter::DamageMaterialTimerExpired()
+{
+	GetMesh()->SetMaterial(0, DefaultMaterial);
+}
+
+void AXRDefenseCharacter::DamageMaterialStartTimer(float TimeDuration)
+{
+	GetWorld()->GetTimerManager().SetTimer(DamageMaterialTimerHandle, this, &AXRDefenseCharacter::DamageMaterialTimerExpired, TimeDuration, false);
 }
 
 void AXRDefenseCharacter::UpdateHealthBarWidget()
@@ -223,12 +260,39 @@ void AXRDefenseCharacter::ApplyAttackDamage()
 
 void AXRDefenseCharacter::FireBullet()
 {
+	const USkeletalMeshSocket* MuzzleSocket = GetMesh()->GetSocketByName(FName("Muzzle_Front"));
+	if (MuzzleSocket)
+	{
+		FTransform MuzzleTransform = MuzzleSocket->GetSocketTransform(GetMesh());
+		FVector ToTarget = CombatTarget->GetActorLocation() - MuzzleTransform.GetLocation();
+		FRotator ToTargetRotation = ToTarget.Rotation();
 
+		FActorSpawnParameters SpawnParam;
+		SpawnParam.Instigator = GetInstigator();
+		SpawnParam.Owner = this;
+
+		if (BulletClass)
+		{
+			AProjectile* Bullet =  GetWorld()->SpawnActor<AProjectile>(
+				BulletClass,
+				MuzzleTransform.GetLocation(),
+				ToTargetRotation,
+				SpawnParam
+			);
+
+			Bullet->SetTarget(CombatTarget);
+			Bullet->SetDamage(AttackDamage);
+
+		}
+	}
+	
 }
 
 void AXRDefenseCharacter::Death()
 {
 	if (isDead) return;
+
+	GetMesh()->SetMaterial(0, DefaultMaterial);
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -240,9 +304,15 @@ void AXRDefenseCharacter::Death()
 		PlayAnimMontage(DeathMontage);
 	}
 
+	if (DeathSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), DeathSound, GetActorLocation());
+	}
 
-	FString str = FString::Printf(TEXT("FireBullet : %f"), DeathTime);
-	GEngine->AddOnScreenDebugMessage(6, 1.f, FColor::Yellow, *str);
+	if (DeathParticle)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathParticle, GetActorLocation(), GetActorRotation());
+	}
 
 	SetLifeSpan(DeathTime);
 
@@ -270,6 +340,8 @@ bool AXRDefenseCharacter::CheckBeneathIsPlacableArea(FVector StartPoint)
 
 	return LinetraceResult.bBlockingHit;
 }
+
+
 
 void AXRDefenseCharacter::SetHighlightStencilValue()
 {

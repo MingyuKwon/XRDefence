@@ -12,6 +12,7 @@ class UWidgetComponent;
 class UHealthBarWidget;
 class UBehaviorTree;
 class AXRDefenceAIController;
+class AProjectile;
 
 UCLASS()
 class XRDEFENSE_API AXRDefenseCharacter : public ACharacter, public IOutlineInterface, public ICombatInterface
@@ -86,6 +87,36 @@ private:
 	//Animation
 
 
+	//Material
+	// 기본 Material
+	UPROPERTY(VisibleAnywhere)
+	class UMaterialInterface* DefaultMaterial;
+
+	// 데미지 받았을 때의 Material
+	UPROPERTY(EditAnywhere)
+	class UMaterialInterface* DamagedMaterial;
+	//Material
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* DamagedSound;
+
+	FTimerHandle DamageMaterialTimerHandle;
+
+	// 타이머가 만료될 때 호출될 함수
+	void DamageMaterialTimerExpired();
+
+	// 타이머를 시작하는 함수
+	void DamageMaterialStartTimer(float TimeDuration);
+
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* DeathParticle;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* DeathSound;
+
+
+
 	UPROPERTY(VisibleAnyWhere)
 	bool bIsHighlighted;
 
@@ -107,6 +138,8 @@ private:
 	UPROPERTY()
 	AXRDefenceAIController* XRDefenceAIController;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AProjectile> BulletClass;
 
 	UPROPERTY(EditAnyWhere)
 	float AttackRange;
